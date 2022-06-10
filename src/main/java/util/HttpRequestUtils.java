@@ -52,6 +52,9 @@ public class HttpRequestUtils {
     public static Pair parseHeader(String header) {
         return getKeyValue(header, ": ");
     }
+    public static String ParseUrlFromHeader(String header) {
+        return header.split(" ")[1]; // TODO 이렇게 숫자를 넣으면 유지보수에 좋지가 않은데,,;
+    }
 
     public static class Pair {
         String key;
