@@ -13,8 +13,8 @@ public class HttpRequestUtils {
      *            URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
      * @return
      */
-    public static Map<String, String> parseQueryString(String queryString) {
-        return parseValues(queryString, "&");
+    public static Map<String, String> parseQueryString(String url) {
+        return parseValues(parseQueryStringFromUrl(url), "&");
     }
 
     /**
@@ -24,6 +24,17 @@ public class HttpRequestUtils {
      */
     public static Map<String, String> parseCookies(String cookies) {
         return parseValues(cookies, ";");
+    }
+
+    public static boolean isQueryUrl(String url) {
+        return url.contains("?");
+    }
+    private static String parseQueryStringFromUrl(String url) {
+        String[] tokens = url.split("\\?");
+        if (tokens.length < 2) {
+            return "";
+        }
+        return tokens[1]; //TODO: [1]로 해도 되나?
     }
 
     private static Map<String, String> parseValues(String values, String separator) {

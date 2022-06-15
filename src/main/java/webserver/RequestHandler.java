@@ -3,7 +3,9 @@ package webserver;
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.Map;
 
+import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
@@ -27,12 +29,20 @@ public class RequestHandler extends Thread {
             if (line == null) {
                 return;
             }
-            String url = HttpRequestUtils.ParseUrlFromHeader(line);
+            String url = HttpRequestUtils.ParseUrlFromHeader(line); // 이 line도 계속 읽어서 POST data 가져와야 하고
+            String[] token = url.split("/");
+            String lastUrl = token[token.length-1];
+            if (HttpRequestUtils.isQueryUrl(lastUrl) || lastUrl.split("\\?")[1].endsWith("create")) { //TODO: code가 개판인데.. 리팩토링을 어떻게 할 지가 감도 안 잡히네,,
+                Map<String, String> map = HttpRequestUtils.parseQueryString(url);
+                User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
+                log.debug(user.toString());
+            }
+
             DataOutputStream dos = new DataOutputStream(out);
             byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
             response200Header(dos, body.length);
             responseBody(dos, body);
-            br.close(); // TODO: close 꼭 해야 하는지?
+            br.close();
         } catch (IOException e) {
             log.error(e.getMessage());
         }
