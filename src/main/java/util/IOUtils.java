@@ -13,10 +13,6 @@ public class IOUtils {
      * @throws IOException
      */
 
-    public static String parseUrlFromBr(BufferedReader br) throws IOException {
-        String line = br.readLine();
-        return HttpRequestUtils.parseUrlFromLine(line);
-    }
 
     public static String parseHTTPBody(BufferedReader br) throws IOException {
         boolean headersFinished = false;

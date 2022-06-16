@@ -26,9 +26,12 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String url = IOUtils.parseUrlFromBr(br);
+            String line = br.readLine();
+            String method = HttpRequestUtils.parseHTTPMethodFromLine(line);
+            String url = HttpRequestUtils.parseUrlFromLine(line);
             String lastUrl = HttpRequestUtils.parseEndUrlFromUrl(url);
-            if (lastUrl.endsWith("create")) { //TODO: code가 개판인데.. 리팩토링을 어떻게 할 지가 감도 안 잡히네,,
+
+            if (method.equals("POST") && lastUrl.endsWith("create")) { //TODO: code가 개판인데.. 리팩토링을 어떻게 할 지가 감도 안 잡히네,,
                 String body = IOUtils.parseHTTPBody(br);
                 Map<String, String> map = HttpRequestUtils.parseNameValFromQueryString(body);
                 User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));

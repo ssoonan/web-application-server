@@ -16,9 +16,7 @@ public class RequestTest {
     @Test
     public void parsingUrlFromHeader() throws IOException {
         String headerLine = "GET /index.html HTTP/1.1";
-        StringReader sr = new StringReader(headerLine);
-        BufferedReader br = new BufferedReader(sr);
-        assertEquals("/index.html", IOUtils.parseUrlFromBr(br));
+        assertEquals("/index.html", HttpRequestUtils.parseUrlFromLine(headerLine));
     }
 
     @Test

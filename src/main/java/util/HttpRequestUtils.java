@@ -11,6 +11,13 @@ public class HttpRequestUtils {
      * @return
      */
 
+    public static String parseHTTPMethodFromLine(String line) {
+        if (line == null) {
+            return "";
+        }
+        return line.split(" ")[0];
+    }
+
     public static String parseEndUrlFromUrl(String url) {
         String[] token = url.split("/");
         return token[token.length-1];
