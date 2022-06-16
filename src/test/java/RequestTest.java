@@ -18,6 +18,11 @@ public class RequestTest {
         String headerLine = "GET /index.html HTTP/1.1";
         assertEquals("/index.html", HttpRequestUtils.parseUrlFromLine(headerLine));
     }
+    @Test
+    public void parsingCookieFromHeaderLine() {
+        String headerLine = "Cookie: logined=true";
+        assertTrue(Boolean.parseBoolean(HttpRequestUtils.parseCookie(headerLine).get("logined")));
+    }
 
     @Test
     public void parsingQueryString() {

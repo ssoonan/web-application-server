@@ -5,14 +5,24 @@ import java.io.IOException;
 
 public class IOUtils {
     /**
-     * @param BufferedReader는
-     *            Request Body를 시작하는 시점이어야
+     * @param BufferedReader
      * @param contentLength는
      *            Request Header의 Content-Length 값이다.
      * @return
      * @throws IOException
      */
 
+    public static String parseCookieLine(BufferedReader br) throws IOException {
+        boolean ifCookie = false;
+        String line = "";
+        while (!ifCookie) {
+            line = br.readLine();
+            if (line.startsWith("Cookie:")) {
+                return line;
+            }
+        }
+        return line;
+    }
 
     public static String parseHTTPBody(BufferedReader br) throws IOException {
         boolean headersFinished = false;

@@ -34,6 +34,12 @@ public class HttpRequestUtils {
         return parseValues(queryString, "&");
     };
 
+    public static Map<String, String> parseCookie(String line) {
+        String[] tokens = line.split(" "); // Cookie: logined=true;a=b ... 이런 식으로 옴
+        String cookieLine = tokens[tokens.length-1];
+        return parseValues(cookieLine, ";");
+    };
+
     private static Map<String, String> parseValues(String param, String separator) {
         if (StringUtils.isEmpty(param)) {
             return new HashMap<>();
