@@ -34,7 +34,7 @@ public class RequestHandler extends Thread {
             String[] token = url.split("/"); // TODO: 이런 split 등도 다 분리가 필요
             String lastUrl = token[token.length-1];
             if (lastUrl.endsWith("create")) { //TODO: code가 개판인데.. 리팩토링을 어떻게 할 지가 감도 안 잡히네,,
-                Map<String, String> map = HttpRequestUtils.parseQueryString(url);
+                Map<String, String> map = HttpRequestUtils.parseNameValFromQueryString(url);
                 User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
                 log.debug(user.toString());
             }

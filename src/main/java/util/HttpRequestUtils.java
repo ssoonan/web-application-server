@@ -1,123 +1,37 @@
 package util;
 
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 
 public class HttpRequestUtils {
     /**
-     * @param queryString은
-     *            URL에서 ? 이후에 전달되는 field1=value1&field2=value2 형식임
+     * @param queryString
      * @return
      */
-    public static Map<String, String> parseQueryString(String url) {
-        return parseValues(parseQueryStringFromUrl(url), "&");
-    }
-
-    /**
-     * @param 쿠키
-     *            값은 name1=value1; name2=value2 형식임
-     * @return
-     */
-    public static Map<String, String> parseCookies(String cookies) {
-        return parseValues(cookies, ";");
-    }
-
-    public static boolean isQueryUrl(String url) {
-        return url.contains("?");
-    }
-    private static String parseQueryStringFromUrl(String url) {
+    public static String parseQueryStringFromUrl(String url) {
         String[] tokens = url.split("\\?");
         if (tokens.length < 2) {
             return "";
         }
-        return tokens[1]; //TODO: [1]로 해도 되나?
+        return tokens[1]; //TODO: 그냥 이렇게 배열로 쉭~?
     }
 
-    private static Map<String, String> parseValues(String values, String separator) {
-        if (Strings.isNullOrEmpty(values)) {
-            return Maps.newHashMap();
-        }
-
-        String[] tokens = values.split(separator);
-        return Arrays.stream(tokens).map(t -> getKeyValue(t, "=")).filter(p -> p != null)
-                .collect(Collectors.toMap(p -> p.getKey(), p -> p.getValue()));
-    }
-
-    static Pair getKeyValue(String keyValue, String regex) {
-        if (Strings.isNullOrEmpty(keyValue)) {
-            return null;
-        }
-
-        String[] tokens = keyValue.split(regex);
-        if (tokens.length != 2) {
-            return null;
-        }
-
-        return new Pair(tokens[0], tokens[1]);
-    }
-
-    public static Pair parseHeader(String header) {
-        return getKeyValue(header, ": ");
-    }
     public static String ParseUrlFromHeader(String header) {
         return header.split(" ")[1]; // TODO 이렇게 숫자를 넣으면 유지보수에 좋지가 않은데,,;
     }
 
-    public static class Pair {
-        String key;
-        String value;
+    public static Map<String, String> parseNameValFromQueryString(String queryString) {
+        return parseValues(queryString, "&");
+    };
 
-        Pair(String key, String value) {
-            this.key = key.trim();
-            this.value = value.trim();
+    private static Map<String, String> parseValues(String param, String separator) {
+        if (StringUtils.isEmpty(param)) {
+            return new HashMap<>();
         }
 
-        public String getKey() {
-            return key;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((key == null) ? 0 : key.hashCode());
-            result = prime * result + ((value == null) ? 0 : value.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            Pair other = (Pair) obj;
-            if (key == null) {
-                if (other.key != null)
-                    return false;
-            } else if (!key.equals(other.key))
-                return false;
-            if (value == null) {
-                if (other.value != null)
-                    return false;
-            } else if (!value.equals(other.value))
-                return false;
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return "Pair [key=" + key + ", value=" + value + "]";
-        }
+        String[] eachTokens = param.split(separator); //
+        return Arrays.stream(eachTokens).map(string -> string.split("=")).collect(Collectors.toMap(a -> a[0], a -> a[1]));
     }
 }

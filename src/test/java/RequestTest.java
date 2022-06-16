@@ -3,27 +3,41 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import util.HttpRequestUtils;
 
-import java.util.Map;
+import java.util.*;
 
 public class RequestTest {
 
+    String param = "a=1&b=2&c=3";
+
     @Test
-    public void extractHeaderTest() {
-        String line = "GET /asd HTTP/1.1";
-        String url = HttpRequestUtils.ParseUrlFromHeader(line);
-        assertEquals("/asd", url);
+    public void parsingUrl() {
+        String url = "/asd/bcd?a=1&b=2&c=3";
+        String noUrl = "/asd/bcd";
+        assertEquals("a=1&b=2&c=3", HttpRequestUtils.parseQueryStringFromUrl(url));
+        assertEquals("", HttpRequestUtils.parseQueryStringFromUrl(noUrl));
     }
 
     @Test
-    public void isQueryUrlTest() {
-        String url = "/user/create?userid=asd&password=12345";
-        assertTrue(HttpRequestUtils.isQueryUrl(url));
+    public void parsingQueryString() {
+        Map<String, String> result = HttpRequestUtils.parseNameValFromQueryString(param);
+        assertEquals(result.get("a"), "1");
+        assertEquals(result.get("b"), "2");
+        assertEquals(result.get("c"), "3");
     }
+
     @Test
-    public void parseQueryStringFromWholeUrl() {
-        String url = "/user/create?userid=asd&password=12345";
-        Map<String, String> map = HttpRequestUtils.parseQueryString(url);
-        assertEquals(map.get("userid"), "asd");
-        assertEquals(map.get("password"), "12345");
+    public void emptyQueryString() {
+        String param = "";
+        Map<String, String> result = HttpRequestUtils.parseNameValFromQueryString(param);
+        assertEquals(new HashMap<String, String>(), result);
+
+    }
+
+    @Test
+    public void onlyOneQueryString() {
+        String param = "a=1";
+        Map<String, String> result = HttpRequestUtils.parseNameValFromQueryString(param);
+        assertTrue(result.containsKey("a"));
+        assertTrue(result.containsValue("1"));
     }
 }
