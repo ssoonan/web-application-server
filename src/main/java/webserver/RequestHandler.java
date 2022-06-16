@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Map;
 
+import db.DataBase;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +20,11 @@ public class RequestHandler extends Thread {
     public RequestHandler(Socket connectionSocket) {
         this.connection = connectionSocket;
     }
+    private static boolean ifLogined = false;
 
     public void run() {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
                 connection.getPort());
-
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
             String line = br.readLine();
@@ -36,13 +37,25 @@ public class RequestHandler extends Thread {
                 String body = IOUtils.parseHTTPBody(br);
                 Map<String, String> map = HttpRequestUtils.parseNameValFromQueryString(body);
                 User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
+                DataBase.addUser(user);
                 log.debug(user.toString());
+                response302(dos, "/index.html");
+            }
+
+            if (method.equals("POST") && lastUrl.endsWith("login")) {
+                String body = IOUtils.parseHTTPBody(br);
+                Map<String, String> map = HttpRequestUtils.parseNameValFromQueryString(body);
+                User user = DataBase.findUserById(map.get("userId"));
+                if (user == null){
+                    response302(dos, "/user/login_failed.html");
+                }
+                ifLogined = true;
                 response302(dos, "/index.html");
             }
 
             if (lastUrl.endsWith("html")) {
                 byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
-                response200Header(dos, body.length);
+                response200Header(dos, body.length, ifLogined);
                 responseBody(dos, body);
             }
             br.close();
@@ -51,10 +64,11 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void response200Header(DataOutputStream dos, int lengthOfBodyContent) {
+    private void response200Header(DataOutputStream dos, int lengthOfBodyContent, boolean ifLogined) {
         try {
             dos.writeBytes("HTTP/1.1 200 OK \r\n");
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
+            dos.writeBytes("Set-Cookie: logined=" + ifLogined + "\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
         } catch (IOException e) {
