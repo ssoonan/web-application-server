@@ -15,10 +15,7 @@ public class IOUtils {
 
     public static String parseUrlFromBr(BufferedReader br) throws IOException {
         String line = br.readLine();
-        if (line == null) {
-            return "";
-        }
-        return line.split(" ")[1];
+        return HttpRequestUtils.parseUrlFromLine(line);
     }
 
     public static String parseHTTPBody(BufferedReader br) throws IOException {

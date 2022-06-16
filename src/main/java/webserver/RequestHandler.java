@@ -26,23 +26,20 @@ public class RequestHandler extends Thread {
 
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String line = br.readLine();
-            if (line == null) {
-                return;
-            }
-            String url = HttpRequestUtils.ParseUrlFromHeader(line); // 이 line도 계속 읽어서 POST data 가져와야 하고
-            String[] token = url.split("/"); // TODO: 이런 split 등도 다 분리가 필요
-            String lastUrl = token[token.length-1];
+            String url = IOUtils.parseUrlFromBr(br);
+            String lastUrl = HttpRequestUtils.parseEndUrlFromUrl(url);
             if (lastUrl.endsWith("create")) { //TODO: code가 개판인데.. 리팩토링을 어떻게 할 지가 감도 안 잡히네,,
-                Map<String, String> map = HttpRequestUtils.parseNameValFromQueryString(url);
+                String body = IOUtils.parseHTTPBody(br);
+                Map<String, String> map = HttpRequestUtils.parseNameValFromQueryString(body);
                 User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
                 log.debug(user.toString());
             }
-
-            DataOutputStream dos = new DataOutputStream(out);
-            byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
-            response200Header(dos, body.length);
-            responseBody(dos, body);
+            if (lastUrl.endsWith("html")) {
+                DataOutputStream dos = new DataOutputStream(out);
+                byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
+                response200Header(dos, body.length);
+                responseBody(dos, body);
+            }
             br.close();
         } catch (IOException e) {
             log.error(e.getMessage());

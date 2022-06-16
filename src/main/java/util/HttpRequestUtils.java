@@ -10,14 +10,18 @@ public class HttpRequestUtils {
      * @param queryString
      * @return
      */
-    public static String parseQueryStringFromUrl(String url) {
-        String[] tokens = url.split("\\?");
-        if (tokens.length < 2) {
-            return "";
-        }
-        return tokens[1]; //TODO: 그냥 이렇게 배열로 쉭~?
+
+    public static String parseEndUrlFromUrl(String url) {
+        String[] token = url.split("/");
+        return token[token.length-1];
     }
 
+    public static String parseUrlFromLine(String line) {
+        if (line == null) {
+            return "";
+        }
+        return line.split(" ")[1];
+    }
 
     public static Map<String, String> parseNameValFromQueryString(String queryString) {
         return parseValues(queryString, "&");

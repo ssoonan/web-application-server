@@ -20,13 +20,6 @@ public class RequestTest {
         BufferedReader br = new BufferedReader(sr);
         assertEquals("/index.html", IOUtils.parseUrlFromBr(br));
     }
-    @Test
-    public void parsingUrl() {
-        String url = "/asd/bcd?a=1&b=2&c=3";
-        String noUrl = "/asd/bcd";
-        assertEquals("a=1&b=2&c=3", HttpRequestUtils.parseQueryStringFromUrl(url));
-        assertEquals("", HttpRequestUtils.parseQueryStringFromUrl(noUrl));
-    }
 
     @Test
     public void parsingQueryString() {
