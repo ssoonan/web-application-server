@@ -12,9 +12,31 @@ public class IOUtils {
      * @return
      * @throws IOException
      */
-    public static String readData(BufferedReader br, int contentLength) throws IOException {
-        char[] body = new char[contentLength];
-        br.read(body, 0, contentLength);
+
+    public static String parseUrlFromBr(BufferedReader br) throws IOException {
+        String line = br.readLine();
+        if (line == null) {
+            return "";
+        }
+        return line.split(" ")[1];
+    }
+
+    public static String parseHTTPBody(BufferedReader br) throws IOException {
+        boolean headersFinished = false;
+        int contentLength = -1;
+
+        while (!headersFinished) {
+            String line = br.readLine();
+            headersFinished = line.isEmpty();
+
+            if (line.startsWith("Content-Length:")) {
+                String cl = line.substring("Content-Length:".length()).trim();
+                contentLength = Integer.parseInt(cl);
+            }
+        }
+
+        char[] body = new char[contentLength];  //<-- http body is here
+        br.read(body);
         return String.copyValueOf(body);
     }
 }

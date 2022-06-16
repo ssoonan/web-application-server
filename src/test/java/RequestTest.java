@@ -2,13 +2,24 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 import util.HttpRequestUtils;
+import util.IOUtils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.*;
 
 public class RequestTest {
 
     String param = "a=1&b=2&c=3";
 
+    @Test
+    public void parsingUrlFromHeader() throws IOException {
+        String headerLine = "GET /index.html HTTP/1.1";
+        StringReader sr = new StringReader(headerLine);
+        BufferedReader br = new BufferedReader(sr);
+        assertEquals("/index.html", IOUtils.parseUrlFromBr(br));
+    }
     @Test
     public void parsingUrl() {
         String url = "/asd/bcd?a=1&b=2&c=3";
