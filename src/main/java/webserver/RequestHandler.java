@@ -2,6 +2,7 @@ package webserver;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Map;
@@ -27,19 +28,18 @@ public class RequestHandler extends Thread {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
                 connection.getPort());
         try (InputStream in = connection.getInputStream(); OutputStream out = connection.getOutputStream()) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
             String line = br.readLine();
             String method = HttpRequestUtils.parseHTTPMethodFromLine(line);
             String url = HttpRequestUtils.parseUrlFromLine(line);
             String lastUrl = HttpRequestUtils.parseEndUrlFromUrl(url);
-
-            String cookieLine = IOUtils.parseCookieLine(br);
-            Map<String, String> cookieMap = HttpRequestUtils.parseCookie(cookieLine);
+            IOUtils iouUtil = new IOUtils(br);
+            Map<String, String> cookieMap = HttpRequestUtils.parseCookie(iouUtil.HTTP.get("cookie"));
 
             DataOutputStream dos = new DataOutputStream(out);
 
             if (method.equals("POST")) { //TODO: code가 개판인데.. 리팩토링을 어떻게 할 지가 감도 안 잡히네,,
-                String body = IOUtils.parseHTTPBody(br);
+                String body = iouUtil.HTTP.get("body");
                 Map<String, String> map = HttpRequestUtils.parseNameValFromQueryString(body);
                 if (lastUrl.endsWith("create")) {
                     User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
@@ -73,14 +73,19 @@ public class RequestHandler extends Thread {
                 for (User user : users) {
                     builder.append("<tr>\n" + "<th scope=\"row\">1</th> <td>").append(user.getUserId()).append("</td><td>").append(user.getName()).append("</td><td>").append(user.getEmail()).append("</td><td><a href=\"#\" class=\"btn btn-success\" role=\"button\">수정</a></td>\n").append("</tr>");
                 }
-                String body = builder.toString();
-                response200Header(dos, body.length(), ifLogined);
+                byte[] body = builder.toString().getBytes();
+                response200Header(dos, body.length, ifLogined);
                 responseBody(dos, body);
             }
 
             if (lastUrl.endsWith("html")) {
                 byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
                 response200Header(dos, body.length, ifLogined);
+                responseBody(dos, body);
+            }
+            if (lastUrl.endsWith("css")) {
+                byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
+                response200CssHeader(dos, body.length);
                 responseBody(dos, body);
             }
             br.close();
@@ -101,6 +106,17 @@ public class RequestHandler extends Thread {
         }
     }
 
+    private void response200CssHeader(DataOutputStream dos, int lengthOfBodyContent) {
+        try {
+            dos.writeBytes("HTTP/1.1 200 OK \r\n");
+            dos.writeBytes("Content-Type: text/css;charset=utf-8\r\n");
+            dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
+            dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
     private void response302(DataOutputStream dos, String url) {
         try {
             dos.writeBytes("HTTP/1.1 302 Found \r\n");
@@ -112,14 +128,14 @@ public class RequestHandler extends Thread {
         }
     }
 
-    private void responseBody(DataOutputStream dos, String body) {
-        try {
-            dos.writeBytes(body);
-            dos.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
+//    private void responseBody(DataOutputStream dos, String body) {
+//        try {
+//            dos.writeBytes(body);
+//            dos.flush();
+//        } catch (IOException e) {
+//            log.error(e.getMessage());
+//        }
+//    }
     private void responseBody(DataOutputStream dos, byte[] body) {
         try {
             dos.write(body, 0, body.length);

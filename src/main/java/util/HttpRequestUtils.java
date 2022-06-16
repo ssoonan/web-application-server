@@ -35,7 +35,7 @@ public class HttpRequestUtils {
     };
 
     public static Map<String, String> parseCookie(String line) {
-        String[] tokens = line.split(" "); // Cookie: logined=true;a=b ... 이런 식으로 옴
+        String[] tokens = line.split(" "); // Cookie: logined=true;a=b -> map으로 각각을 분리해서 리턴
         String cookieLine = tokens[tokens.length-1];
         return parseValues(cookieLine, ";");
     };
