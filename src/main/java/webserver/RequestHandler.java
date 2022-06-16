@@ -9,6 +9,7 @@ import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.HttpRequestUtils;
+import util.IOUtils;
 
 public class RequestHandler extends Thread {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -30,9 +31,9 @@ public class RequestHandler extends Thread {
                 return;
             }
             String url = HttpRequestUtils.ParseUrlFromHeader(line); // 이 line도 계속 읽어서 POST data 가져와야 하고
-            String[] token = url.split("/");
+            String[] token = url.split("/"); // TODO: 이런 split 등도 다 분리가 필요
             String lastUrl = token[token.length-1];
-            if (HttpRequestUtils.isQueryUrl(lastUrl) || lastUrl.split("\\?")[1].endsWith("create")) { //TODO: code가 개판인데.. 리팩토링을 어떻게 할 지가 감도 안 잡히네,,
+            if (lastUrl.endsWith("create")) { //TODO: code가 개판인데.. 리팩토링을 어떻게 할 지가 감도 안 잡히네,,
                 Map<String, String> map = HttpRequestUtils.parseQueryString(url);
                 User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
                 log.debug(user.toString());
