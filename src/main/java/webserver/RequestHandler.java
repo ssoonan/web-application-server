@@ -33,24 +33,23 @@ public class RequestHandler extends Thread {
             String lastUrl = HttpRequestUtils.parseEndUrlFromUrl(url);
             DataOutputStream dos = new DataOutputStream(out);
 
-            if (method.equals("POST") && lastUrl.endsWith("create")) { //TODO: code가 개판인데.. 리팩토링을 어떻게 할 지가 감도 안 잡히네,,
+            if (method.equals("POST")) { //TODO: code가 개판인데.. 리팩토링을 어떻게 할 지가 감도 안 잡히네,,
                 String body = IOUtils.parseHTTPBody(br);
                 Map<String, String> map = HttpRequestUtils.parseNameValFromQueryString(body);
-                User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
-                DataBase.addUser(user);
-                log.debug(user.toString());
-                response302(dos, "/index.html");
-            }
-
-            if (method.equals("POST") && lastUrl.endsWith("login")) {
-                String body = IOUtils.parseHTTPBody(br);
-                Map<String, String> map = HttpRequestUtils.parseNameValFromQueryString(body);
-                User user = DataBase.findUserById(map.get("userId"));
-                if (user == null){
-                    response302(dos, "/user/login_failed.html");
+                if (lastUrl.endsWith("create")) {
+                    User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
+                    DataBase.addUser(user);
+                    log.debug(user.toString());
+                    response302(dos, "/index.html");
                 }
-                ifLogined = true;
-                response302(dos, "/index.html");
+                if (lastUrl.endsWith("login")) {
+                    User user = DataBase.findUserById(map.get("userId"));
+                    if (user == null){
+                        response302(dos, "/user/login_failed.html");
+                    }
+                    ifLogined = true;
+                    response302(dos, "/index.html");
+                }
             }
 
             if (lastUrl.endsWith("html")) {
