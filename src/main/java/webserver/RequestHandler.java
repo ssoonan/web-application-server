@@ -30,15 +30,17 @@ public class RequestHandler extends Thread {
             String method = HttpRequestUtils.parseHTTPMethodFromLine(line);
             String url = HttpRequestUtils.parseUrlFromLine(line);
             String lastUrl = HttpRequestUtils.parseEndUrlFromUrl(url);
+            DataOutputStream dos = new DataOutputStream(out);
 
             if (method.equals("POST") && lastUrl.endsWith("create")) { //TODO: code가 개판인데.. 리팩토링을 어떻게 할 지가 감도 안 잡히네,,
                 String body = IOUtils.parseHTTPBody(br);
                 Map<String, String> map = HttpRequestUtils.parseNameValFromQueryString(body);
                 User user = new User(map.get("userId"), map.get("password"), map.get("name"), map.get("email"));
                 log.debug(user.toString());
+                response302(dos, "/index.html");
             }
+
             if (lastUrl.endsWith("html")) {
-                DataOutputStream dos = new DataOutputStream(out);
                 byte[] body = Files.readAllBytes(new File("./webapp" + url).toPath());
                 response200Header(dos, body.length);
                 responseBody(dos, body);
@@ -55,6 +57,17 @@ public class RequestHandler extends Thread {
             dos.writeBytes("Content-Type: text/html;charset=utf-8\r\n");
             dos.writeBytes("Content-Length: " + lengthOfBodyContent + "\r\n");
             dos.writeBytes("\r\n");
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void response302(DataOutputStream dos, String url) {
+        try {
+            dos.writeBytes("HTTP/1.1 302 Found \r\n");
+            dos.writeBytes("Location: " + url + "\r\n");
+            dos.writeBytes("\r\n");
+            dos.flush();
         } catch (IOException e) {
             log.error(e.getMessage());
         }
