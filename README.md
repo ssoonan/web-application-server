@@ -1,4 +1,4 @@
-### 요구사항 1 - http://localhost:8080/index.html로 접속시 응답
+### 요구사항 1 - index.html로 접속시 응답
 
 - java inputstream, bufferedreader 용도는 알겠으나 정확한 이해가 필요
   - stream을 쓰면 자원을 반환해야 한다고 생각해서 `close()`를 하였으나 이 때문에 response가 제대로 생성되지 않았음.
@@ -26,3 +26,4 @@ buffer 다루기 정도는 분리 했지만 전체 구조를 잡는 부분이 �
 
 - IOStream, Reader 좀 더 깊이있게 연습해보자. 지금은 너무 날림이다.
 - 그냥 Stream, 데이터 처리도 연습 필요. 
+- 리팩토링과 설계 연습. 어떻게 구조를 짜서 나누는 게 괜찮을지 생각해보기
