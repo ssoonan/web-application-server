@@ -137,6 +137,7 @@ public class RequestHandler extends Thread {
 //        }
 //    }
     private void responseBody(DataOutputStream dos, byte[] body) {
+        // 왜 ByteArrayOutputStream이 아니라 DataoutputStream일까?
         try {
             dos.write(body, 0, body.length);
             dos.flush();

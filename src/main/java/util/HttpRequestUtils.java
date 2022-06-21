@@ -1,12 +1,13 @@
 package util;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
 public class HttpRequestUtils {
-    /**
+    /** requestutil에선 잡다한 처리만, 사용은 HttpRequest에서 하기
      * @param queryString
      * @return
      */
@@ -30,7 +31,14 @@ public class HttpRequestUtils {
         return line.split(" ")[1];
     }
 
+    public static Map<String, String> parseHeaderFromLine(String line) {
+        String[] tokens = line.split(": ");
+        return new HashMap<String, String>(){{put(tokens[0], tokens[1]);}};
+    }
     public static Map<String, String> parseNameValFromQueryString(String queryString) {
+        if (queryString.startsWith("?")) {
+            queryString = queryString.substring(1);
+        }
         return parseValues(queryString, "&");
     };
 
