@@ -27,3 +27,48 @@ buffer 다루기 정도는 분리 했지만 전체 구조를 잡는 부분이 �
 - IOStream, Reader 좀 더 깊이있게 연습해보자. 지금은 너무 날림이다.
 - 그냥 Stream, 데이터 처리도 연습 필요. 
 - 리팩토링과 설계 연습. 어떻게 구조를 짜서 나누는 게 괜찮을지 생각해보기
+
+
+---
+
+### 리팩토링 - 1 : 클래스 분리
+
+현재 프로젝트 구조는
+```
+│── db
+│   └── DataBase.java
+├── model
+│   └── User.java
+├── util
+│   ├── HttpRequestUtils.java
+│   └── IOUtils.java
+└── webserver
+    ├── RequestHandler.java
+    └── WebServer.java
+```
+이렇게 4가지 패키지로 구성.  
+`db`, `model`의 분리는 괜찮지만 `util`, `webserver`은 그냥 있던대로 코드를 막 짰음.   
+특히 `GET, POST` 여부, `라우터 차이`에 따라 `RequestHandler`에서  
+if문으로 나누는 건 너무나도 보기 않 좋고 재사용성도 없음.  
+
+if문 분기는 기본적으로 옵션, 기능이 고도화되며 나오는 자연스러운 흐름.  
+하지만 이 제어의 흐름대로 코드를 짜면 필연적으로 코드는 더러워짐.    
+
+SOLID원칙의 **DIP**에선 이런 의존 관계를 역전시키라고 한다.  
+즉 고차원, 추상을 제어흐름에서 먼저 써야함. 중간에 인터페이스를 끼워넣어야함. 
+
+이 말이 어렵다면 제어 흐름을 먼저 관찰하자.  
+`WebServer의 main -> RequestHandler`이고 이 `RequestHandler`에서 분기에 따라 수많은 처리를 담당중임  
+이 처리에는 공통적으로 Request와 Response가 있음. SRP에 따라 Request, Response를 분리, 클래스화하고,   
+이들을 묶는 인터페이스를 RequestHandler가 참조하게 만들자.
+
+```
+WebServer main -> RequestHandler
+에서
+
+                                               ↙ HttpRequest
+WebServer main -> RequestHandler -> Controller   
+                                               ↖ HttpResponse
+로 바뀜
+```
+이렇게 의존성을 바꿔보자. 그러면 어느 정도는 다형성을 확보할 수 있음.
